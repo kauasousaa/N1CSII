@@ -15,3 +15,7 @@ export function formatarData(dataIso) {
 export function pluralizar(quantidade, singular, plural) {
   return `${quantidade} ${quantidade === 1 ? singular : plural}`;
 }
+
+export function capitalizar(texto) {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}

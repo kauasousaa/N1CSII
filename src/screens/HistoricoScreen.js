@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-nativ
 import CampoBusca from '../components/CampoBusca';
 import DoacaoItem from '../components/DoacaoItem';
 import EstadoVazio from '../components/EstadoVazio';
+import ResumoDoacoes from '../components/ResumoDoacoes';
 import TelaComTeclado from '../components/TelaComTeclado';
 import { useDoacoes } from '../hooks/useDoacoes';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
@@ -73,6 +74,7 @@ export default function HistoricoScreen({ navigation }) {
         data={doacoesFiltradas}
         keyExtractor={(doacao) => doacao.id}
         renderItem={renderizarDoacao}
+        ListHeaderComponent={<ResumoDoacoes doacoes={doacoes} />}
         ListEmptyComponent={renderizarListaVazia()}
         contentContainerStyle={styles.conteudoLista}
         keyboardShouldPersistTaps="handled"
