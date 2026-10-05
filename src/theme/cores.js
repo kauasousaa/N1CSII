@@ -9,3 +9,5 @@ export const cores = {
   borda: '#BDBDBD',
   erro: '#C62828',
 };
+
+export const larguraMaximaConteudo = 600;

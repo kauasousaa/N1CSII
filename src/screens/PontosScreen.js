@@ -3,6 +3,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import PontoItem from '../components/PontoItem';
 import Tela from '../components/Tela';
 import { pontosColeta } from '../data/pontosColeta';
+import { larguraMaximaConteudo } from '../theme/cores';
 
 export default function PontosScreen({ navigation }) {
   const abrirDetalhe = useCallback(
@@ -30,5 +31,8 @@ export default function PontosScreen({ navigation }) {
 const styles = StyleSheet.create({
   conteudo: {
     padding: 16,
+    width: '100%',
+    maxWidth: larguraMaximaConteudo,
+    alignSelf: 'center',
   },
 });

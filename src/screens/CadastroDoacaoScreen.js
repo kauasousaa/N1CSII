@@ -4,6 +4,7 @@ import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import SeletorPonto from '../components/SeletorPonto';
 import TelaComTeclado from '../components/TelaComTeclado';
+import { larguraMaximaConteudo } from '../theme/cores';
 import { temErros, validarDoacao } from '../utils/validacaoDoacao';
 
 export default function CadastroDoacaoScreen({ route }) {
@@ -60,5 +61,8 @@ export default function CadastroDoacaoScreen({ route }) {
 const styles = StyleSheet.create({
   conteudo: {
     padding: 16,
+    width: '100%',
+    maxWidth: larguraMaximaConteudo,
+    alignSelf: 'center',
   },
 });

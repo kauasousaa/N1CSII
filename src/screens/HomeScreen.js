@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import Botao from '../components/Botao';
 import Tela from '../components/Tela';
-import { cores } from '../theme/cores';
+import { cores, larguraMaximaConteudo } from '../theme/cores';
 
 export default function HomeScreen({ navigation }) {
   return (
@@ -31,6 +31,9 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   conteudo: {
     padding: 16,
+    width: '100%',
+    maxWidth: larguraMaximaConteudo,
+    alignSelf: 'center',
   },
   titulo: {
     fontSize: 24,

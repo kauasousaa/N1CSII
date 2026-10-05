@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import EtiquetaTipo from '../components/EtiquetaTipo';
 import Tela from '../components/Tela';
-import { cores } from '../theme/cores';
+import { cores, larguraMaximaConteudo } from '../theme/cores';
 
 function Secao({ titulo, children }) {
   return (
@@ -71,6 +71,9 @@ export default function DetalhePontoScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   conteudo: {
     padding: 16,
+    width: '100%',
+    maxWidth: larguraMaximaConteudo,
+    alignSelf: 'center',
   },
   card: {
     backgroundColor: cores.branco,
