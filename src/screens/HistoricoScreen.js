@@ -9,7 +9,15 @@ import { cores, larguraMaximaConteudo } from '../theme/cores';
 export default function HistoricoScreen({ navigation }) {
   const { doacoes, carregando, erro } = useDoacoes();
 
-  const renderizarDoacao = useCallback(({ item }) => <DoacaoItem doacao={item} />, []);
+  const abrirDetalhe = useCallback(
+    (doacao) => navigation.navigate('DetalheDoacao', { doacao }),
+    [navigation]
+  );
+
+  const renderizarDoacao = useCallback(
+    ({ item }) => <DoacaoItem doacao={item} onPress={abrirDetalhe} />,
+    [abrirDetalhe]
+  );
 
   if (carregando) {
     return (

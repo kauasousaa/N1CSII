@@ -1,11 +1,16 @@
 import { memo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { cores } from '../theme/cores';
 import { formatarData, pluralizar } from '../utils/formatacao';
 
-function DoacaoItem({ doacao }) {
+function DoacaoItem({ doacao, onPress }) {
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onPress(doacao)}
+      accessibilityRole="button"
+      accessibilityHint="Abre os detalhes da doação"
+    >
       <View style={styles.linhaTopo}>
         <Text style={styles.tipo} numberOfLines={1}>
           {doacao.tipoItem}
@@ -16,7 +21,7 @@ function DoacaoItem({ doacao }) {
         Destino: {doacao.pontoDestino}
       </Text>
       <Text style={styles.data}>{formatarData(doacao.criadoEm)}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -24,6 +29,7 @@ export default memo(DoacaoItem);
 
 const styles = StyleSheet.create({
   card: {
+    minHeight: 44,
     backgroundColor: cores.branco,
     borderRadius: 8,
     padding: 16,

@@ -27,3 +27,8 @@ export async function salvarDoacao(doacao) {
   await gravarDoacoes([...doacoes, novaDoacao]);
   return novaDoacao;
 }
+
+export async function excluirDoacao(id) {
+  const doacoes = await listarDoacoes();
+  await gravarDoacoes(doacoes.filter((doacao) => doacao.id !== id));
+}
