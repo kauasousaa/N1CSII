@@ -28,6 +28,16 @@ export async function salvarDoacao(doacao) {
   return novaDoacao;
 }
 
+export async function atualizarDoacao(doacaoAtualizada) {
+  const doacoes = await listarDoacoes();
+  const novaLista = doacoes.map((doacao) =>
+    doacao.id === doacaoAtualizada.id ? { ...doacao, ...doacaoAtualizada } : doacao
+  );
+
+  await gravarDoacoes(novaLista);
+  return novaLista.find((doacao) => doacao.id === doacaoAtualizada.id);
+}
+
 export async function excluirDoacao(id) {
   const doacoes = await listarDoacoes();
   await gravarDoacoes(doacoes.filter((doacao) => doacao.id !== id));

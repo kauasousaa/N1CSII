@@ -37,6 +37,10 @@ export default function DetalheDoacaoScreen({ navigation, route }) {
     );
   }
 
+  function handleEditar() {
+    navigation.navigate('CadastroDoacao', { doacao });
+  }
+
   return (
     <Tela>
       <ScrollView contentContainerStyle={styles.conteudo}>
@@ -50,6 +54,7 @@ export default function DetalheDoacaoScreen({ navigation, route }) {
           <LinhaDetalhe rotulo="Registrada em" valor={formatarData(doacao.criadoEm)} />
         </View>
 
+        <Botao titulo="Editar doação" onPress={handleEditar} estilo={styles.botao} />
         <Botao
           titulo="Excluir doação"
           variante="perigo"
