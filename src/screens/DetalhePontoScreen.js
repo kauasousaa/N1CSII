@@ -1,4 +1,5 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import Botao from '../components/Botao';
 import EtiquetaTipo from '../components/EtiquetaTipo';
 import Tela from '../components/Tela';
 import { cores } from '../theme/cores';
@@ -20,7 +21,7 @@ function ListaItens({ itens }) {
   ));
 }
 
-export default function DetalhePontoScreen({ route }) {
+export default function DetalhePontoScreen({ navigation, route }) {
   const { ponto } = route.params;
   const recebeDoacoes = ponto.recebe.length > 0;
 
@@ -52,6 +53,16 @@ export default function DetalhePontoScreen({ route }) {
           ) : null}
         </View>
 
+        {recebeDoacoes ? (
+          <Botao
+            titulo="Doar para este ponto"
+            onPress={() => navigation.navigate('CadastroDoacao', { pontoInicial: ponto.nome })}
+          />
+        ) : (
+          <Text style={styles.aviso}>
+            Este ponto só distribui doações. Para doar, escolha um ponto de coleta.
+          </Text>
+        )}
       </ScrollView>
     </Tela>
   );
@@ -84,5 +95,10 @@ const styles = StyleSheet.create({
   texto: {
     fontSize: 16,
     color: cores.texto,
+  },
+  aviso: {
+    fontSize: 15,
+    color: cores.textoSecundario,
+    textAlign: 'center',
   },
 });
