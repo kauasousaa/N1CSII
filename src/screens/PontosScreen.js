@@ -1,54 +1,34 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
+import PontoItem from '../components/PontoItem';
+import Tela from '../components/Tela';
 import { pontosColeta } from '../data/pontosColeta';
-import { cores } from '../theme/cores';
 
-export default function PontosScreen() {
+export default function PontosScreen({ navigation }) {
+  const abrirDetalhe = useCallback(
+    (ponto) => navigation.navigate('DetalhePonto', { ponto }),
+    [navigation]
+  );
+
+  const renderizarPonto = useCallback(
+    ({ item }) => <PontoItem ponto={item} onPress={abrirDetalhe} />,
+    [abrirDetalhe]
+  );
+
   return (
-    <SafeAreaView style={styles.tela}>
-      <ScrollView contentContainerStyle={styles.conteudo}>
-        <Text style={styles.titulo}>Pontos de coleta</Text>
-        {pontosColeta.map((ponto) => (
-          <View key={ponto.id} style={styles.card}>
-            <Text style={styles.nome}>{ponto.nome}</Text>
-            <Text style={styles.info}>{ponto.endereco}</Text>
-            <Text style={styles.info}>{ponto.horario}</Text>
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+    <Tela>
+      <FlatList
+        contentContainerStyle={styles.conteudo}
+        data={pontosColeta}
+        keyExtractor={(ponto) => ponto.id}
+        renderItem={renderizarPonto}
+      />
+    </Tela>
   );
 }
 
 const styles = StyleSheet.create({
-  tela: {
-    flex: 1,
-    backgroundColor: cores.fundo,
-  },
   conteudo: {
     padding: 16,
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: cores.primariaEscura,
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: cores.branco,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
-  },
-  nome: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: cores.texto,
-    marginBottom: 4,
-  },
-  info: {
-    fontSize: 15,
-    color: cores.textoSecundario,
   },
 });
