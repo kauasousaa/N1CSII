@@ -1,20 +1,13 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import Tela from '../components/Tela';
-import { listarDoacoes } from '../storage/doacoesStorage';
+import { useDoacoes } from '../hooks/useDoacoes';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
+import { pluralizar } from '../utils/formatacao';
 
 export default function HomeScreen({ navigation }) {
-  const [doacoes, setDoacoes] = useState([]);
-  const ultimaDoacao = doacoes[doacoes.length - 1];
-
-  useFocusEffect(
-    useCallback(() => {
-      listarDoacoes().then(setDoacoes);
-    }, [])
-  );
+  const { doacoes } = useDoacoes();
+  const ultimaDoacao = doacoes[0];
 
   return (
     <Tela>
@@ -31,7 +24,9 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.textoCard}>
                 {ultimaDoacao.quantidade}x {ultimaDoacao.tipoItem} para {ultimaDoacao.pontoDestino}
               </Text>
-              <Text style={styles.textoCard}>Total registrado: {doacoes.length}</Text>
+              <Text style={styles.textoCard}>
+                Total registrado: {pluralizar(doacoes.length, 'doação', 'doações')}
+              </Text>
             </>
           ) : (
             <Text style={styles.textoCard}>Você ainda não registrou nenhuma doação.</Text>
@@ -41,6 +36,12 @@ export default function HomeScreen({ navigation }) {
         <Botao
           titulo="Registrar doação"
           onPress={() => navigation.navigate('CadastroDoacao')}
+          estilo={styles.botao}
+        />
+        <Botao
+          titulo="Minhas doações"
+          variante="secundario"
+          onPress={() => navigation.navigate('Historico')}
           estilo={styles.botao}
         />
         <Botao
