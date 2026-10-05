@@ -1,13 +1,21 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import CampoBusca from '../components/CampoBusca';
 import DoacaoItem from '../components/DoacaoItem';
 import EstadoVazio from '../components/EstadoVazio';
-import Tela from '../components/Tela';
+import TelaComTeclado from '../components/TelaComTeclado';
 import { useDoacoes } from '../hooks/useDoacoes';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
+import { filtrarPorTipo } from '../utils/filtroDoacoes';
 
 export default function HistoricoScreen({ navigation }) {
   const { doacoes, carregando, erro } = useDoacoes();
+  const [textoBusca, setTextoBusca] = useState('');
+
+  const doacoesFiltradas = useMemo(
+    () => filtrarPorTipo(doacoes, textoBusca),
+    [doacoes, textoBusca]
+  );
 
   const abrirDetalhe = useCallback(
     (doacao) => navigation.navigate('DetalheDoacao', { doacao }),
@@ -18,6 +26,20 @@ export default function HistoricoScreen({ navigation }) {
     ({ item }) => <DoacaoItem doacao={item} onPress={abrirDetalhe} />,
     [abrirDetalhe]
   );
+
+  function renderizarListaVazia() {
+    if (doacoes.length === 0) {
+      return (
+        <EstadoVazio
+          mensagem="Você ainda não registrou nenhuma doação."
+          tituloBotao="Registrar minha primeira doação"
+          onPressBotao={() => navigation.navigate('CadastroDoacao')}
+        />
+      );
+    }
+
+    return <EstadoVazio mensagem={`Nenhuma doação encontrada para "${textoBusca.trim()}".`} />;
+  }
 
   if (carregando) {
     return (
@@ -36,21 +58,27 @@ export default function HistoricoScreen({ navigation }) {
   }
 
   return (
-    <Tela>
+    <TelaComTeclado>
+      {doacoes.length > 0 ? (
+        <View style={styles.areaBusca}>
+          <CampoBusca
+            valor={textoBusca}
+            onChangeTexto={setTextoBusca}
+            placeholder="Buscar por tipo de item"
+          />
+        </View>
+      ) : null}
+
       <FlatList
-        data={doacoes}
+        data={doacoesFiltradas}
         keyExtractor={(doacao) => doacao.id}
         renderItem={renderizarDoacao}
-        ListEmptyComponent={
-          <EstadoVazio
-            mensagem="Você ainda não registrou nenhuma doação."
-            tituloBotao="Registrar minha primeira doação"
-            onPressBotao={() => navigation.navigate('CadastroDoacao')}
-          />
-        }
+        ListEmptyComponent={renderizarListaVazia()}
         contentContainerStyle={styles.conteudoLista}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       />
-    </Tela>
+    </TelaComTeclado>
   );
 }
 
@@ -67,8 +95,17 @@ const styles = StyleSheet.create({
     color: cores.erro,
     textAlign: 'center',
   },
+  areaBusca: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    width: '100%',
+    maxWidth: larguraMaximaConteudo,
+    alignSelf: 'center',
+  },
   conteudoLista: {
     padding: 16,
+    paddingTop: 8,
     width: '100%',
     maxWidth: larguraMaximaConteudo,
     alignSelf: 'center',
