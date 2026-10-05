@@ -1,0 +1,29 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Único lugar do app que mexe no AsyncStorage para doações.
+const chaveDoacoes = '@maoAmiga:doacoes';
+
+function gerarId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function gravarDoacoes(doacoes) {
+  await AsyncStorage.setItem(chaveDoacoes, JSON.stringify(doacoes));
+}
+
+export async function listarDoacoes() {
+  const doacoesSalvas = await AsyncStorage.getItem(chaveDoacoes);
+  return doacoesSalvas ? JSON.parse(doacoesSalvas) : [];
+}
+
+export async function salvarDoacao(doacao) {
+  const doacoes = await listarDoacoes();
+  const novaDoacao = {
+    ...doacao,
+    id: gerarId(),
+    criadoEm: new Date().toISOString(),
+  };
+
+  await gravarDoacoes([...doacoes, novaDoacao]);
+  return novaDoacao;
+}

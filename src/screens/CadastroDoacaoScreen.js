@@ -4,7 +4,7 @@ import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import SeletorPonto from '../components/SeletorPonto';
 import TelaComTeclado from '../components/TelaComTeclado';
-import { salvarUltimaDoacao } from '../storage/ultimaDoacaoStorage';
+import { salvarDoacao } from '../storage/doacoesStorage';
 import { larguraMaximaConteudo } from '../theme/cores';
 import { temErros, validarDoacao } from '../utils/validacaoDoacao';
 
@@ -31,10 +31,7 @@ export default function CadastroDoacaoScreen({ navigation, route }) {
     }
 
     try {
-      await salvarUltimaDoacao({
-        ...montarDoacao({ tipoItem, quantidade, pontoDestino }),
-        criadoEm: new Date().toISOString(),
-      });
+      await salvarDoacao(montarDoacao({ tipoItem, quantidade, pontoDestino }));
       Alert.alert('Obrigado!', 'Sua doação foi registrada.');
       navigation.goBack();
     } catch (erro) {

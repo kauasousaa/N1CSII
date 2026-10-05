@@ -3,15 +3,16 @@ import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import Tela from '../components/Tela';
-import { buscarUltimaDoacao } from '../storage/ultimaDoacaoStorage';
+import { listarDoacoes } from '../storage/doacoesStorage';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 
 export default function HomeScreen({ navigation }) {
-  const [ultimaDoacao, setUltimaDoacao] = useState(null);
+  const [doacoes, setDoacoes] = useState([]);
+  const ultimaDoacao = doacoes[doacoes.length - 1];
 
   useFocusEffect(
     useCallback(() => {
-      buscarUltimaDoacao().then(setUltimaDoacao);
+      listarDoacoes().then(setDoacoes);
     }, [])
   );
 
@@ -26,9 +27,12 @@ export default function HomeScreen({ navigation }) {
         <View style={styles.card}>
           <Text style={styles.tituloCard}>Última doação</Text>
           {ultimaDoacao ? (
-            <Text style={styles.textoCard}>
-              {ultimaDoacao.quantidade}x {ultimaDoacao.tipoItem} para {ultimaDoacao.pontoDestino}
-            </Text>
+            <>
+              <Text style={styles.textoCard}>
+                {ultimaDoacao.quantidade}x {ultimaDoacao.tipoItem} para {ultimaDoacao.pontoDestino}
+              </Text>
+              <Text style={styles.textoCard}>Total registrado: {doacoes.length}</Text>
+            </>
           ) : (
             <Text style={styles.textoCard}>Você ainda não registrou nenhuma doação.</Text>
           )}
