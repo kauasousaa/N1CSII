@@ -4,16 +4,25 @@ import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import SeletorPonto from '../components/SeletorPonto';
 import TelaComTeclado from '../components/TelaComTeclado';
+import { salvarUltimaDoacao } from '../storage/ultimaDoacaoStorage';
 import { larguraMaximaConteudo } from '../theme/cores';
 import { temErros, validarDoacao } from '../utils/validacaoDoacao';
 
-export default function CadastroDoacaoScreen({ route }) {
+function montarDoacao({ tipoItem, quantidade, pontoDestino }) {
+  return {
+    tipoItem: tipoItem.trim(),
+    quantidade: Number(quantidade),
+    pontoDestino,
+  };
+}
+
+export default function CadastroDoacaoScreen({ navigation, route }) {
   const [tipoItem, setTipoItem] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [pontoDestino, setPontoDestino] = useState(route.params?.pontoInicial ?? '');
   const [erros, setErros] = useState({});
 
-  function handleSalvar() {
+  async function handleSalvar() {
     const errosEncontrados = validarDoacao({ tipoItem, quantidade, pontoDestino });
     setErros(errosEncontrados);
 
@@ -21,7 +30,16 @@ export default function CadastroDoacaoScreen({ route }) {
       return;
     }
 
-    Alert.alert('Tudo certo!', 'Os dados da doação são válidos.');
+    try {
+      await salvarUltimaDoacao({
+        ...montarDoacao({ tipoItem, quantidade, pontoDestino }),
+        criadoEm: new Date().toISOString(),
+      });
+      Alert.alert('Obrigado!', 'Sua doação foi registrada.');
+      navigation.goBack();
+    } catch (erro) {
+      Alert.alert('Erro', 'Não foi possível salvar a doação. Tente novamente.');
+    }
   }
 
   return (

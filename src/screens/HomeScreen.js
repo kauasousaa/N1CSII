@@ -1,9 +1,20 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import Tela from '../components/Tela';
+import { buscarUltimaDoacao } from '../storage/ultimaDoacaoStorage';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 
 export default function HomeScreen({ navigation }) {
+  const [ultimaDoacao, setUltimaDoacao] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      buscarUltimaDoacao().then(setUltimaDoacao);
+    }, [])
+  );
+
   return (
     <Tela>
       <ScrollView contentContainerStyle={styles.conteudo}>
@@ -11,6 +22,17 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.subtitulo}>
           Registre suas doações e encontre o ponto de coleta mais perto de você.
         </Text>
+
+        <View style={styles.card}>
+          <Text style={styles.tituloCard}>Última doação</Text>
+          {ultimaDoacao ? (
+            <Text style={styles.textoCard}>
+              {ultimaDoacao.quantidade}x {ultimaDoacao.tipoItem} para {ultimaDoacao.pontoDestino}
+            </Text>
+          ) : (
+            <Text style={styles.textoCard}>Você ainda não registrou nenhuma doação.</Text>
+          )}
+        </View>
 
         <Botao
           titulo="Registrar doação"
@@ -45,6 +67,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: cores.textoSecundario,
     marginBottom: 20,
+  },
+  card: {
+    backgroundColor: cores.branco,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 2,
+  },
+  tituloCard: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: cores.texto,
+    marginBottom: 6,
+  },
+  textoCard: {
+    fontSize: 16,
+    color: cores.textoSecundario,
   },
   botao: {
     marginBottom: 12,
