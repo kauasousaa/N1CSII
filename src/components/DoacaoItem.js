@@ -12,14 +12,10 @@ function DoacaoItem({ doacao, onPress }) {
       accessibilityHint="Abre os detalhes da doação"
     >
       <View style={styles.linhaTopo}>
-        <Text style={styles.tipo} numberOfLines={1}>
-          {doacao.tipoItem}
-        </Text>
+        <Text style={styles.tipo}>{doacao.tipoItem}</Text>
         <Text style={styles.quantidade}>{pluralizar(doacao.quantidade, 'unidade', 'unidades')}</Text>
       </View>
-      <Text style={styles.info} numberOfLines={2}>
-        Destino: {doacao.pontoDestino}
-      </Text>
+      <Text style={styles.info}>Destino: {doacao.pontoDestino}</Text>
       <Text style={styles.data}>{formatarData(doacao.criadoEm)}</Text>
     </TouchableOpacity>
   );
@@ -41,7 +37,7 @@ const styles = StyleSheet.create({
   linhaTopo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 8,
     marginBottom: 4,
   },
