@@ -1,12 +1,21 @@
+<<<<<<< HEAD
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+=======
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+>>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
 import Botao from '../components/Botao';
 import EtiquetaTipo from '../components/EtiquetaTipo';
 import Tela from '../components/Tela';
 import { ErroApi } from '../services/api';
+<<<<<<< HEAD
 import { limparRetorno } from '../services/retornoPonto';
 import { buscarPorId, excluir } from '../services/pontosService';
+=======
+import { buscarPorId } from '../services/pontosService';
+>>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 
 function Secao({ titulo, children }) {
@@ -24,6 +33,7 @@ export default function DetalhePontoScreen({ navigation, route }) {
   const [carregando, setCarregando] = useState(true);
   const [mensagem, setMensagem] = useState('');
 
+<<<<<<< HEAD
   useFocusEffect(
     useCallback(() => {
       let ativo = true;
@@ -80,6 +90,38 @@ export default function DetalhePontoScreen({ navigation, route }) {
       );
     }
   }
+=======
+  useEffect(() => {
+    let ativo = true;
+    setCarregando(true);
+    setMensagem('');
+
+    buscarPorId(id)
+      .then((encontrado) => {
+        if (ativo) {
+          setPonto(encontrado);
+        }
+      })
+      .catch((erro) => {
+        if (!ativo) {
+          return;
+        }
+        setPonto(null);
+        setMensagem(erro instanceof ErroApi && erro.status === 404
+          ? 'ponto não encontrado'
+          : 'Não foi possível carregar o ponto. Confira se a API está ligada.');
+      })
+      .finally(() => {
+        if (ativo) {
+          setCarregando(false);
+        }
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [id]);
+>>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
 
   if (carregando) {
     return (
@@ -180,9 +222,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 24,
   },
+<<<<<<< HEAD
   botao: {
     marginBottom: 12,
   },
+=======
+>>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
   carregando: {
     marginTop: 32,
   },
