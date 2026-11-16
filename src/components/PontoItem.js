@@ -1,21 +1,31 @@
 import { memo } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { cores } from '../theme/cores';
 import EtiquetaTipo from './EtiquetaTipo';
 
-function PontoItem({ ponto, onPress }) {
+function PontoItem({ ponto, favorito, onPress, onAlternarFavorito }) {
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => onPress(ponto)}
-      accessibilityRole="button"
-      accessibilityHint="Abre os detalhes do ponto"
-    >
-      <EtiquetaTipo tipo={ponto.tipo} />
-      <Text style={styles.nome}>{ponto.nome}</Text>
-      <Text style={styles.info}>{ponto.endereco}</Text>
-      <Text style={styles.info}>{ponto.diasHorarios}</Text>
-    </TouchableOpacity>
+    <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.conteudo}
+        onPress={() => onPress(ponto.id)}
+        accessibilityRole="button"
+        accessibilityHint="Abre os detalhes do ponto"
+      >
+        <EtiquetaTipo tipo={ponto.tipo} />
+        <Text style={styles.nome}>{ponto.nome}</Text>
+        <Text style={styles.info}>{ponto.endereco}</Text>
+        <Text style={styles.info}>{ponto.horario}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.favorito}
+        onPress={() => onAlternarFavorito(ponto.id)}
+        accessibilityRole="button"
+        accessibilityLabel={favorito ? 'Desfavoritar ponto' : 'Favoritar ponto'}
+      >
+        <Text style={styles.coracao}>{favorito ? '♥' : '♡'}</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -26,9 +36,27 @@ const styles = StyleSheet.create({
     minHeight: 44,
     backgroundColor: cores.branco,
     borderRadius: 8,
-    padding: 16,
     marginBottom: 12,
     elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  conteudo: {
+    flex: 1,
+    padding: 16,
+  },
+  favorito: {
+    width: 44,
+    height: 44,
+    minWidth: 44,
+    minHeight: 44,
+    marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coracao: {
+    fontSize: 22,
+    color: cores.primariaEscura,
   },
   nome: {
     fontSize: 18,

@@ -1,0 +1,82 @@
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { cores } from '../theme/cores';
+
+function OpcaoTipo({ valor, rotulo, escolhido, onPress }) {
+  return (
+    <TouchableOpacity
+      style={[styles.opcao, escolhido && styles.opcaoEscolhida]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: escolhido }}
+    >
+      <Text style={[styles.texto, escolhido && styles.textoEscolhido]}>{rotulo}</Text>
+    </TouchableOpacity>
+  );
+}
+
+export default function SeletorTipoPonto({ tipoSelecionado, onSelecionar, erro }) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.rotulo}>Tipo</Text>
+      <View style={styles.opcoes}>
+        <OpcaoTipo
+          valor="coleta"
+          rotulo="Coleta"
+          escolhido={tipoSelecionado === 'coleta'}
+          onPress={() => onSelecionar('coleta')}
+        />
+        <OpcaoTipo
+          valor="distribuição"
+          rotulo="Distribuição"
+          escolhido={tipoSelecionado === 'distribuição'}
+          onPress={() => onSelecionar('distribuição')}
+        />
+      </View>
+      {erro ? <Text style={styles.erro}>{erro}</Text> : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
+  rotulo: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: cores.texto,
+    marginBottom: 6,
+  },
+  opcoes: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  opcao: {
+    flex: 1,
+    minHeight: 48,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: cores.borda,
+    borderRadius: 8,
+    backgroundColor: cores.branco,
+  },
+  opcaoEscolhida: {
+    borderColor: cores.primaria,
+    backgroundColor: cores.primaria,
+  },
+  texto: {
+    fontSize: 16,
+    color: cores.texto,
+  },
+  textoEscolhido: {
+    color: cores.branco,
+    fontWeight: 'bold',
+  },
+  erro: {
+    color: cores.erro,
+    marginTop: 4,
+    fontSize: 14,
+  },
+});

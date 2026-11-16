@@ -7,7 +7,7 @@ function DoacaoItem({ doacao, onPress }) {
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => onPress(doacao)}
+      onPress={() => onPress(doacao.id)}
       accessibilityRole="button"
       accessibilityHint="Abre os detalhes da doação"
     >

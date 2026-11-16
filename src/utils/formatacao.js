@@ -3,7 +3,17 @@ function doisDigitos(numero) {
 }
 
 export function formatarData(dataIso) {
-  const data = new Date(dataIso);
+  const texto = String(dataIso ?? '');
+  const partes = texto.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (partes) {
+    const [, ano, mes, dia, hora, minuto] = partes;
+    return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+  }
+
+  const data = new Date(texto);
+  if (Number.isNaN(data.getTime())) {
+    return texto;
+  }
   const dia = doisDigitos(data.getDate());
   const mes = doisDigitos(data.getMonth() + 1);
   const hora = doisDigitos(data.getHours());
@@ -14,8 +24,4 @@ export function formatarData(dataIso) {
 
 export function pluralizar(quantidade, singular, plural) {
   return `${quantidade} ${quantidade === 1 ? singular : plural}`;
-}
-
-export function capitalizar(texto) {
-  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }

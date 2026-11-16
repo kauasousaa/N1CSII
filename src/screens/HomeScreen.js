@@ -1,13 +1,38 @@
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import Tela from '../components/Tela';
-import { useDoacoes } from '../hooks/useDoacoes';
+import { listarPagina } from '../services/doacoesService';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 import { pluralizar } from '../utils/formatacao';
 
 export default function HomeScreen({ navigation }) {
-  const { doacoes } = useDoacoes();
-  const ultimaDoacao = doacoes[0];
+  const [ultimaDoacao, setUltimaDoacao] = useState(null);
+  const [total, setTotal] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      let ativo = true;
+      listarPagina('', 0, 1)
+        .then((pagina) => {
+          if (!ativo) {
+            return;
+          }
+          setUltimaDoacao(pagina.content[0] ?? null);
+          setTotal(pagina.page.totalElements);
+        })
+        .catch(() => {
+          if (ativo) {
+            setUltimaDoacao(null);
+            setTotal(0);
+          }
+        });
+      return () => {
+        ativo = false;
+      };
+    }, [])
+  );
 
   return (
     <Tela>
@@ -25,7 +50,7 @@ export default function HomeScreen({ navigation }) {
                 {ultimaDoacao.quantidade}x {ultimaDoacao.tipoItem} para {ultimaDoacao.pontoDestino}
               </Text>
               <Text style={styles.textoCard}>
-                Total registrado: {pluralizar(doacoes.length, 'doação', 'doações')}
+                Total registrado: {pluralizar(total, 'doação', 'doações')}
               </Text>
             </>
           ) : (
@@ -48,6 +73,12 @@ export default function HomeScreen({ navigation }) {
           titulo="Ver pontos de coleta"
           variante="secundario"
           onPress={() => navigation.navigate('Pontos')}
+          estilo={styles.botao}
+        />
+        <Botao
+          titulo="Meus pontos"
+          variante="secundario"
+          onPress={() => navigation.navigate('MeusPontos')}
           estilo={styles.botao}
         />
       </ScrollView>

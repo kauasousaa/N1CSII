@@ -2,7 +2,7 @@
 
 App em React Native (Expo) para consultar os pontos de coleta e distribuição do Instituto Mão Amiga e registrar doações.
 
-Nesta semana (N1) o app passou a guardar o **histórico completo** de doações: dá para ver, filtrar, editar e excluir, e ainda ver um resumo com os totais por tipo de item.
+Na N1 o histórico de doações ficava no celular. Na N2, pontos e doações vêm da API. Só os pontos favoritos continuam no aparelho.
 
 ## Como rodar
 
@@ -11,20 +11,51 @@ npm install
 npm start
 ```
 
-Depois é só abrir no Expo Go (lendo o QR Code) ou apertar `a` para o emulador Android.
+Depois é só abrir no Expo Go (lendo o QR Code) ou apertar `a` para o emulador Android. O projeto usa o **Expo SDK 58**, então o Expo Go do celular precisa ser da versão do SDK 58.
+
+A API fica em um repositório separado: [mao-amiga-api](https://github.com/kauasousaa/mao-amiga-api), na pasta `C:\WorkKaua\mao-amiga-api`. Ela precisa de **Java 17**. Na pasta da API:
+
+```bash
+mvnw.cmd spring-boot:run
+```
+
+A URL do servidor está só em `src/services/api.ts` (`http://192.168.1.2:8080`). É o IP do computador na rede local, não `localhost`, para o celular alcançar a API. Se o IP mudar, troque esse valor nesse arquivo. Celular e computador precisam estar na mesma rede.
+
+## N2-3 — pontos vindos da API
+
+A lista de pontos não usa mais o array fixo. `PontosScreen` pede páginas em `GET /api/v1/pontos/filtro`, com rolagem infinita, e a busca volta para a primeira página. O detalhe recebe só o `id` e busca o ponto na API. Se o id não existir, a tela mostra "ponto não encontrado". Se a API estiver desligada, a lista mostra uma mensagem de erro e o botão "Tentar de novo".
+
+## N2-4 — cadastrar, editar e excluir pontos
+
+O formulário fica em `CadastroPontoScreen` e serve para os dois casos. No cadastro, o botão envia `POST`. Na edição, o mesmo formulário abre preenchido e o botão "Salvar alterações" envia `PUT`. O tipo é escolhido entre coleta e distribuição. Campo vazio não sai do aparelho. Se a API recusar ou estiver desligada, a mensagem aparece e o que foi digitado permanece.
+
+Excluir pede confirmação com Cancelar e Excluir. Confirmar envia `DELETE` e o ponto sai da lista. A lista recarrega ao voltar para ela, então o ponto novo ou editado aparece sem fechar o app. O detalhe busca de novo pelo id e mostra os valores novos.
+
+## N2-6 e N2-7 — doações pela API
+
+O cadastro, o histórico, a edição e a exclusão de doações usam a API. `src/services/doacoesService.ts` lista a página com filtro, busca por id, cadastra, edita e exclui, sempre pelo `api.ts`. Nenhuma tela guarda doação no AsyncStorage.
+
+O ponto de destino é um `TouchableOpacity` por ponto vindo de `GET /api/v1/pontos`. Só aparecem os pontos de coleta, porque os de distribuição não recebem doação. O escolhido fica destacado e a API recebe o nome do ponto. O histórico é uma `FlatList` com `keyExtractor` pelo id, rolagem infinita e filtro de tipo feito na API. Doação nova aparece no topo ao voltar para o histórico. Carregando, erro de API desligada e lista vazia têm mensagens diferentes. Se a API recusar ou estiver desligada, o formulário mostra o aviso e mantém o que foi digitado.
+
+O detalhe da doação recebe só o id e busca na API. Doação inexistente mostra "doação não encontrada". Editar reabre o mesmo formulário, já preenchido, com o botão "Salvar alterações". O `PUT` mantém o id e a data de cadastro. Excluir pede Cancelar ou Excluir; confirmar envia `DELETE` e a doação sai do histórico.
+
+## N2-8 — pontos favoritos
+
+Cada ponto da lista tem um botão ♡ / ♥ com área de toque de 44x44. Os favoritos ficam no AsyncStorage só com o id, em `src/storage/favoritosStorage.js`, e continuam depois de fechar o app. A tela "Meus pontos" busca cada id na API. Sem favoritos, a tela avisa que está vazia. Ponto excluído fica de fora sem quebrar a tela. O botão "Desfavoritar" tira o ponto na hora e atualiza o AsyncStorage.
+
+Favoritos ficam no aparelho porque são uma preferência de quem está usando o celular. Pontos e doações ficam no servidor porque são os dados do instituto, compartilhados entre os aparelhos.
 
 ## Estrutura de pastas
 
 ```
 src/
-  components/   componentes reutilizáveis (Botao, CampoTexto, DoacaoItem, ResumoDoacoes...)
-  data/         lista fixa dos pontos de coleta
-  hooks/        useDoacoes (carrega as doações sempre que a tela ganha foco)
+  components/   componentes reutilizáveis (Botao, CampoTexto, DoacaoItem, PontoItem, SeletorPonto...)
+  services/     api.ts (único fetch), pontosService.ts e doacoesService.ts
   navigation/   rotas do app (stack)
   screens/      telas
-  storage/      doacoesStorage.js -> único arquivo que acessa o AsyncStorage
+  storage/      favoritosStorage.js -> AsyncStorage só com os ids dos pontos favoritos
   theme/        cores e medidas
-  utils/        funções puras: validação, filtro, resumo, formatação de data
+  utils/        funções puras: validação de ponto e de doação, formatação de data
 ```
 
 Formato de cada doação salva:
@@ -40,26 +71,25 @@ Formato de cada doação salva:
 | #01 | Carta de abertura e setup do ambiente | `checklist-setup.md` |
 | #02 | Repositório pessoal e escopo único | `ficha-observacao.md` |
 | #03 | Lista de pontos de coleta | `src/screens/PontosScreen.js` |
-| #04 | Navegação lista → detalhe com FlatList e dados ampliados | `src/screens/DetalhePontoScreen.js`, `src/data/pontosColeta.js` |
+| #04 | Navegação lista → detalhe com FlatList e dados ampliados | `src/screens/DetalhePontoScreen.js` (a lista fixa saiu na N2-3) |
 | #05 | Formulário de cadastro com validação | `src/screens/CadastroDoacaoScreen.js`, `src/utils/validacaoDoacao.js` |
 | #06 | Layout responsivo | `src/theme/cores.js` (`larguraMaximaConteudo`), estilos das telas |
-| #07 | Persistência local da doação | `src/storage/doacoesStorage.js` |
-| #08 | Histórico salvo no aparelho | `src/storage/doacoesStorage.js` |
+| #07 | Persistência local da doação | saiu na N2-6; doações foram para a API |
+| #08 | Histórico salvo no aparelho | saiu na N2-6; o histórico vem de `doacoesService.ts` |
 | #09 | Tela de histórico com FlatList | `src/screens/HistoricoScreen.js`, `src/components/DoacaoItem.js` |
-| #10 | Detalhe e exclusão | `src/screens/DetalheDoacaoScreen.js`, `excluirDoacao(id)` |
-| #11 | Editar uma doação | `src/screens/CadastroDoacaoScreen.js` (mesmo formulário), `atualizarDoacao(doacao)` |
-| #12 | Filtro por tipo de item | `src/utils/filtroDoacoes.js`, `src/components/CampoBusca.js` |
-| #13 | Resumo com totais por tipo | `src/utils/resumoDoacoes.js`, `src/components/ResumoDoacoes.js` |
+| #10 | Detalhe e exclusão | `src/screens/DetalheDoacaoScreen.js`, `excluir(id)` em `doacoesService.ts` |
+| #11 | Editar uma doação | `src/screens/CadastroDoacaoScreen.js` (mesmo formulário), `editar(id, dados)` em `doacoesService.ts` |
+| #12 | Filtro por tipo de item | na N2-6 o filtro passou para a API; `src/components/CampoBusca.js` envia o texto |
+| #13 | Resumo com totais por tipo | saiu na N2-6, como o PDF permite; a Home mostra a última doação e o total |
 | #14 | Acabamento e roteiro | este README |
 
 ## Roteiro de demonstração (até 3 minutos)
 
-1. **Registrar** (30s): na tela inicial, tocar em "Registrar doação". Tentar salvar vazio para mostrar as validações. Preencher "Roupa", quantidade 10, escolher "Sede Centro" e salvar. Registrar mais duas: "Alimento" (30) e "roupa infantil" (5), essa abrindo "Ver pontos de coleta", tocando em "Paróquia São José" e depois em "Doar para este ponto".
-2. **Ver o histórico** (20s): voltar e tocar em "Minhas doações". Mostrar a lista (mais recente primeiro) e o resumo no topo com os tipos ordenados pela quantidade.
-3. **Filtrar** (20s): digitar "ROUPA" na busca e mostrar que aparecem "Roupa" e "roupa infantil" (não diferencia maiúsculas). Digitar "brinquedo" e mostrar a mensagem de nenhum resultado. Apagar o texto e a lista completa volta.
-4. **Editar** (30s): tocar em "Roupa", depois em "Editar doação". Mostrar que o título mudou para "Editar doação" e o formulário veio preenchido. Trocar a quantidade para 15 e salvar. O detalhe já mostra 15, e ao voltar o histórico e o resumo também.
-5. **Excluir** (20s): no detalhe de uma doação, tocar em "Excluir doação". Primeiro tocar em "Cancelar" (nada muda), depois excluir de verdade. Volta para o histórico, a doação sumiu e o resumo foi recalculado.
-6. **Fechar e reabrir** (20s): fechar o app de verdade (tirar dos recentes) e abrir de novo. Entrar em "Minhas doações": tudo continua lá.
+1. **Buscar um ponto** (20s): em "Ver pontos de coleta", digitar um bairro e mostrar a lista vinda da API.
+2. **Cadastrar, editar e excluir um ponto** (50s): cadastrar um ponto, abrir o detalhe, salvar uma alteração e excluir com confirmação. A lista acompanha cada passo.
+3. **Favoritar** (20s): na lista, tocar no ♡. Abrir "Meus pontos", mostrar o ponto e desfavoritar.
+4. **Cadastrar, editar e excluir uma doação** (50s): registrar uma doação escolhendo um ponto da API. No histórico ela aparece no topo. Abrir o detalhe, salvar uma alteração e excluir.
+5. **400 e 404 na API** (40s): no Swagger, enviar uma doação com quantidade 0 (400) e buscar um id que não existe (404).
 
 ## Testes feitos (Issue #14)
 
@@ -70,8 +100,8 @@ Formato de cada doação salva:
 
 ## Decisões técnicas
 
-- **Acesso ao armazenamento num arquivo só (`doacoesStorage.js`)**: as telas não sabem que existe AsyncStorage, só chamam `listarDoacoes`, `salvarDoacao`, `atualizarDoacao` e `excluirDoacao`. Se um dia trocar o AsyncStorage por uma API ou SQLite, só esse arquivo muda. Também evita ter a chave `@maoAmiga:doacoes` espalhada pelo código.
-- **Totais calculados e não salvos**: o resumo é calculado a partir do array de doações toda vez que a tela renderiza (`calcularResumo`). Se eu salvasse os totais à parte, teria que lembrar de atualizar eles em todo cadastro, edição e exclusão, e qualquer esquecimento deixaria os números errados. Calculando, o resumo nunca fica desatualizado.
-- **Filtro sem segunda lista no estado**: só o texto da busca é estado. A lista filtrada é derivada com `useMemo` a partir do array completo, então não tem como as duas listas ficarem diferentes e o filtro nunca altera o que está salvo.
-- **Um formulário para cadastro e edição**: a tela `CadastroDoacao` recebe (ou não) uma doação por `route.params`. Se recebe, entra no modo edição: troca o título, preenche os campos e salva com `atualizarDoacao` mantendo o mesmo `id`. As validações ficam em `validacaoDoacao.js` e valem para os dois casos.
+- **Favoritos no aparelho, pontos e doações no servidor**: o favorito é uma preferência de quem usa aquele celular, então fica no AsyncStorage, só com o id. Ponto e doação são dados do instituto e ficam na API, no H2, para qualquer aparelho ver a mesma lista.
+- **Filtro e paginação no servidor**: com rolagem infinita o app só tem algumas páginas na memória, então filtrar no aparelho deixaria de fora o que ainda não foi carregado. Por isso o texto da busca vai para a API, e cada busca volta para a primeira página.
+- **Só `api.ts` chama `fetch`**: a URL do servidor fica num lugar só, e os services montam os caminhos. As telas não sabem nada de HTTP, só tratam o `ErroApi` com o status (404 vira "não encontrado", 400 vira "dados recusados").
+- **Um formulário para cadastro e edição**: as telas `CadastroPonto` e `CadastroDoacao` recebem (ou não) o item por `route.params`. Se recebem, entram no modo edição: trocam o título, preenchem os campos, mostram "Salvar alterações" e enviam `PUT` mantendo o mesmo `id`. A data de cadastro da doação é do servidor e não muda na edição.
 - **`DoacaoItem` com `React.memo`** e `renderItem`/`onPress` com `useCallback`, para a lista não re-renderizar todos os itens a cada letra digitada na busca.

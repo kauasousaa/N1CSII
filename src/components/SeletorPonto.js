@@ -1,13 +1,47 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { pontosQueRecebemDoacao } from '../data/pontosColeta';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { listar } from '../services/pontosService';
 import { cores } from '../theme/cores';
 
 export default function SeletorPonto({ pontoSelecionado, onSelecionar, erro }) {
+  const [pontos, setPontos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [falha, setFalha] = useState('');
+
+  useEffect(() => {
+    let ativo = true;
+    listar()
+      .then((lista) => {
+        if (ativo) {
+          setPontos(lista);
+        }
+      })
+      .catch(() => {
+        if (ativo) {
+          setFalha('Não foi possível carregar os pontos da API.');
+        }
+      })
+      .finally(() => {
+        if (ativo) {
+          setCarregando(false);
+        }
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  const opcoes = pontos.filter(
+    (ponto) => ponto.tipo === 'coleta' || ponto.nome === pontoSelecionado
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.rotulo}>Ponto de destino</Text>
+      {carregando ? <ActivityIndicator color={cores.primaria} /> : null}
+      {falha ? <Text style={styles.erro}>{falha}</Text> : null}
       <View style={styles.opcoes}>
-        {pontosQueRecebemDoacao().map((ponto) => {
+        {opcoes.map((ponto) => {
           const selecionado = ponto.nome === pontoSelecionado;
           return (
             <TouchableOpacity
@@ -68,6 +102,7 @@ const styles = StyleSheet.create({
   erro: {
     color: cores.erro,
     marginTop: 4,
+    marginBottom: 8,
     fontSize: 14,
   },
 });

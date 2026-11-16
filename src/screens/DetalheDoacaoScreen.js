@@ -1,7 +1,11 @@
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import Tela from '../components/Tela';
-import { excluirDoacao } from '../storage/doacoesStorage';
+import { ErroApi } from '../services/api';
+import { buscarPorId, excluir } from '../services/doacoesService';
+import { limparRetorno } from '../services/retornoDoacao';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 import { formatarData, pluralizar } from '../utils/formatacao';
 
@@ -15,18 +19,45 @@ function LinhaDetalhe({ rotulo, valor }) {
 }
 
 export default function DetalheDoacaoScreen({ navigation, route }) {
-  const { doacao } = route.params;
+  const { id } = route.params;
+  const [doacao, setDoacao] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [mensagem, setMensagem] = useState('');
 
-  async function apagarDoacao() {
-    try {
-      await excluirDoacao(doacao.id);
-      navigation.popTo('Historico');
-    } catch (erro) {
-      Alert.alert('Erro', 'Não foi possível excluir a doação. Tente novamente.');
-    }
-  }
+  useFocusEffect(
+    useCallback(() => {
+      let ativo = true;
+      setCarregando(true);
+      setMensagem('');
 
-  function handleExcluir() {
+      buscarPorId(id)
+        .then((encontrada) => {
+          if (ativo) {
+            setDoacao(encontrada);
+          }
+        })
+        .catch((erro) => {
+          if (!ativo) {
+            return;
+          }
+          setDoacao(null);
+          setMensagem(erro instanceof ErroApi && erro.status === 404
+            ? 'doação não encontrada'
+            : 'Não foi possível carregar a doação. Confira se a API está ligada.');
+        })
+        .finally(() => {
+          if (ativo) {
+            setCarregando(false);
+          }
+        });
+
+      return () => {
+        ativo = false;
+      };
+    }, [id])
+  );
+
+  function confirmarExclusao() {
     Alert.alert(
       'Excluir doação',
       `Deseja mesmo excluir a doação de ${doacao.quantidade}x ${doacao.tipoItem}?`,
@@ -37,8 +68,33 @@ export default function DetalheDoacaoScreen({ navigation, route }) {
     );
   }
 
-  function handleEditar() {
-    navigation.navigate('CadastroDoacao', { doacao });
+  async function apagarDoacao() {
+    try {
+      await excluir(id);
+      limparRetorno();
+      navigation.popTo('Historico');
+    } catch {
+      Alert.alert(
+        'Não foi possível excluir',
+        'A doação continua na lista. Confira se a API está ligada e tente de novo.'
+      );
+    }
+  }
+
+  if (carregando) {
+    return (
+      <Tela>
+        <ActivityIndicator size="large" color={cores.primaria} style={styles.carregando} />
+      </Tela>
+    );
+  }
+
+  if (!doacao) {
+    return (
+      <Tela>
+        <Text style={styles.aviso}>{mensagem}</Text>
+      </Tela>
+    );
   }
 
   return (
@@ -54,13 +110,12 @@ export default function DetalheDoacaoScreen({ navigation, route }) {
           <LinhaDetalhe rotulo="Registrada em" valor={formatarData(doacao.criadoEm)} />
         </View>
 
-        <Botao titulo="Editar doação" onPress={handleEditar} estilo={styles.botao} />
         <Botao
-          titulo="Excluir doação"
-          variante="perigo"
-          onPress={handleExcluir}
+          titulo="Editar doação"
+          onPress={() => navigation.navigate('CadastroDoacao', { doacao })}
           estilo={styles.botao}
         />
+        <Botao titulo="Excluir doação" variante="perigo" onPress={confirmarExclusao} />
       </ScrollView>
     </Tela>
   );
@@ -97,5 +152,14 @@ const styles = StyleSheet.create({
   },
   botao: {
     marginBottom: 12,
+  },
+  aviso: {
+    fontSize: 16,
+    color: cores.textoSecundario,
+    textAlign: 'center',
+    margin: 24,
+  },
+  carregando: {
+    marginTop: 32,
   },
 });

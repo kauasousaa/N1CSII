@@ -1,7 +1,12 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import EtiquetaTipo from '../components/EtiquetaTipo';
 import Tela from '../components/Tela';
+import { ErroApi } from '../services/api';
+import { limparRetorno } from '../services/retornoPonto';
+import { buscarPorId, excluir } from '../services/pontosService';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 
 function Secao({ titulo, children }) {
@@ -13,17 +18,86 @@ function Secao({ titulo, children }) {
   );
 }
 
-function ListaItens({ itens }) {
-  return itens.map((item) => (
-    <Text key={item} style={styles.texto}>
-      • {item}
-    </Text>
-  ));
-}
-
 export default function DetalhePontoScreen({ navigation, route }) {
-  const { ponto } = route.params;
-  const recebeDoacoes = ponto.recebe.length > 0;
+  const { id } = route.params;
+  const [ponto, setPonto] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [mensagem, setMensagem] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      let ativo = true;
+      setCarregando(true);
+      setMensagem('');
+
+      buscarPorId(id)
+        .then((encontrado) => {
+          if (ativo) {
+            setPonto(encontrado);
+          }
+        })
+        .catch((erro) => {
+          if (!ativo) {
+            return;
+          }
+          setPonto(null);
+          setMensagem(erro instanceof ErroApi && erro.status === 404
+            ? 'ponto não encontrado'
+            : 'Não foi possível carregar o ponto. Confira se a API está ligada.');
+        })
+        .finally(() => {
+          if (ativo) {
+            setCarregando(false);
+          }
+        });
+
+      return () => {
+        ativo = false;
+      };
+    }, [id])
+  );
+
+  function confirmarExclusao() {
+    Alert.alert(
+      'Excluir ponto',
+      `Deseja mesmo excluir ${ponto.nome}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Excluir', style: 'destructive', onPress: apagarPonto },
+      ]
+    );
+  }
+
+  async function apagarPonto() {
+    try {
+      await excluir(id);
+      limparRetorno();
+      navigation.popTo('Pontos');
+    } catch {
+      Alert.alert(
+        'Não foi possível excluir',
+        'O ponto continua na lista. Confira se a API está ligada e tente de novo.'
+      );
+    }
+  }
+
+  if (carregando) {
+    return (
+      <Tela>
+        <ActivityIndicator size="large" color={cores.primaria} style={styles.carregando} />
+      </Tela>
+    );
+  }
+
+  if (!ponto) {
+    return (
+      <Tela>
+        <Text style={styles.aviso}>{mensagem}</Text>
+      </Tela>
+    );
+  }
+
+  const podeReceberDoacao = ponto.tipo === 'coleta';
 
   return (
     <Tela>
@@ -36,33 +110,34 @@ export default function DetalhePontoScreen({ navigation, route }) {
             <Text style={styles.texto}>{ponto.endereco}</Text>
           </Secao>
 
-          <Secao titulo="Dias e horários">
-            <Text style={styles.texto}>{ponto.diasHorarios}</Text>
+          <Secao titulo="Bairro">
+            <Text style={styles.texto}>{ponto.bairro}</Text>
           </Secao>
 
-          {recebeDoacoes ? (
-            <Secao titulo="Recebe">
-              <ListaItens itens={ponto.recebe} />
-            </Secao>
-          ) : null}
-
-          {ponto.distribui.length > 0 ? (
-            <Secao titulo="Distribui">
-              <ListaItens itens={ponto.distribui} />
-            </Secao>
-          ) : null}
+          <Secao titulo="Horário">
+            <Text style={styles.texto}>{ponto.horario}</Text>
+          </Secao>
         </View>
 
-        {recebeDoacoes ? (
+        {podeReceberDoacao ? (
           <Botao
             titulo="Doar para este ponto"
             onPress={() => navigation.navigate('CadastroDoacao', { pontoInicial: ponto.nome })}
+            estilo={styles.botao}
           />
         ) : (
           <Text style={styles.aviso}>
             Este ponto só distribui doações. Para doar, escolha um ponto de coleta.
           </Text>
         )}
+
+        <Botao
+          titulo="Editar ponto"
+          variante="secundario"
+          onPress={() => navigation.navigate('CadastroPonto', { ponto })}
+          estilo={styles.botao}
+        />
+        <Botao titulo="Excluir ponto" variante="perigo" onPress={confirmarExclusao} />
       </ScrollView>
     </Tela>
   );
@@ -100,8 +175,15 @@ const styles = StyleSheet.create({
     color: cores.texto,
   },
   aviso: {
-    fontSize: 15,
+    fontSize: 16,
     color: cores.textoSecundario,
     textAlign: 'center',
+    margin: 24,
+  },
+  botao: {
+    marginBottom: 12,
+  },
+  carregando: {
+    marginTop: 32,
   },
 });
