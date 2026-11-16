@@ -45,32 +45,12 @@ Cada ponto da lista tem um botão ♡ / ♥ com área de toque de 44x44. Os favo
 
 Favoritos ficam no aparelho porque são uma preferência de quem está usando o celular. Pontos e doações ficam no servidor porque são os dados do instituto, compartilhados entre os aparelhos.
 
-A API fica em um repositório separado: [mao-amiga-api](https://github.com/kauasousaa/mao-amiga-api), na pasta `C:\WorkKaua\mao-amiga-api`. Para subir:
-
-```bash
-mvnw.cmd spring-boot:run
-```
-
-A URL do servidor está só em `src/services/api.ts` (`http://192.168.1.2:8080`). É o IP do computador na rede local, não `localhost`, para o celular alcançar a API. Se o IP mudar, troque esse valor. Celular e computador precisam estar na mesma rede.
-
-## N2-3 — pontos vindos da API
-
-A lista de pontos não usa mais o array fixo. `PontosScreen` pede páginas em `GET /api/v1/pontos/filtro`, com rolagem infinita, e a busca volta para a primeira página. O detalhe recebe só o `id` e busca o ponto na API. Se o id não existir, a tela mostra "ponto não encontrado". Se a API estiver desligada, a lista mostra uma mensagem de erro e o botão "Tentar de novo".
-
-O cadastro e a edição de pontos no app ficam para a N2-4. As doações continuam no AsyncStorage.
-
 ## Estrutura de pastas
 
 ```
 src/
-<<<<<<< HEAD
   components/   componentes reutilizáveis (Botao, CampoTexto, DoacaoItem, PontoItem, SeletorPonto...)
   services/     api.ts (único fetch), pontosService.ts e doacoesService.ts
-=======
-  components/   componentes reutilizáveis (Botao, CampoTexto, DoacaoItem, ResumoDoacoes...)
-  services/     api.ts (único fetch) e pontosService.ts
-  hooks/        useDoacoes (carrega as doações sempre que a tela ganha foco)
->>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
   navigation/   rotas do app (stack)
   screens/      telas
   storage/      favoritosStorage.js -> AsyncStorage só com os ids dos pontos favoritos

@@ -31,24 +31,17 @@ export default function SeletorPonto({ pontoSelecionado, onSelecionar, erro }) {
     };
   }, []);
 
-<<<<<<< HEAD
   const opcoes = pontos.filter(
     (ponto) => ponto.tipo === 'coleta' || ponto.nome === pontoSelecionado
   );
 
-=======
->>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
   return (
     <View style={styles.container}>
       <Text style={styles.rotulo}>Ponto de destino</Text>
       {carregando ? <ActivityIndicator color={cores.primaria} /> : null}
       {falha ? <Text style={styles.erro}>{falha}</Text> : null}
       <View style={styles.opcoes}>
-<<<<<<< HEAD
         {opcoes.map((ponto) => {
-=======
-        {pontos.map((ponto) => {
->>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
           const selecionado = ponto.nome === pontoSelecionado;
           return (
             <TouchableOpacity

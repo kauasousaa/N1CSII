@@ -5,7 +5,6 @@ import EtiquetaTipo from './EtiquetaTipo';
 
 function PontoItem({ ponto, favorito, onPress, onAlternarFavorito }) {
   return (
-<<<<<<< HEAD
     <View style={styles.card}>
       <TouchableOpacity
         style={styles.conteudo}
@@ -27,19 +26,6 @@ function PontoItem({ ponto, favorito, onPress, onAlternarFavorito }) {
         <Text style={styles.coracao}>{favorito ? '♥' : '♡'}</Text>
       </TouchableOpacity>
     </View>
-=======
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => onPress(ponto.id)}
-      accessibilityRole="button"
-      accessibilityHint="Abre os detalhes do ponto"
-    >
-      <EtiquetaTipo tipo={ponto.tipo} />
-      <Text style={styles.nome}>{ponto.nome}</Text>
-      <Text style={styles.info}>{ponto.endereco}</Text>
-      <Text style={styles.info}>{ponto.horario}</Text>
-    </TouchableOpacity>
->>>>>>> a63fc94865b3f97242ba2e2a3e0b20865e029b24
   );
 }
 
