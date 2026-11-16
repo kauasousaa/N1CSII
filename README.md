@@ -13,12 +13,26 @@ npm start
 
 Depois é só abrir no Expo Go (lendo o QR Code) ou apertar `a` para o emulador Android.
 
+A API fica em um repositório separado: [mao-amiga-api](https://github.com/kauasousaa/mao-amiga-api), na pasta `C:\WorkKaua\mao-amiga-api`. Para subir:
+
+```bash
+mvnw.cmd spring-boot:run
+```
+
+A URL do servidor está só em `src/services/api.ts` (`http://192.168.1.2:8080`). É o IP do computador na rede local, não `localhost`, para o celular alcançar a API. Se o IP mudar, troque esse valor. Celular e computador precisam estar na mesma rede.
+
+## N2-3 — pontos vindos da API
+
+A lista de pontos não usa mais o array fixo. `PontosScreen` pede páginas em `GET /api/v1/pontos/filtro`, com rolagem infinita, e a busca volta para a primeira página. O detalhe recebe só o `id` e busca o ponto na API. Se o id não existir, a tela mostra "ponto não encontrado". Se a API estiver desligada, a lista mostra uma mensagem de erro e o botão "Tentar de novo".
+
+O cadastro e a edição de pontos no app ficam para a N2-4. As doações continuam no AsyncStorage.
+
 ## Estrutura de pastas
 
 ```
 src/
   components/   componentes reutilizáveis (Botao, CampoTexto, DoacaoItem, ResumoDoacoes...)
-  data/         lista fixa dos pontos de coleta
+  services/     api.ts (único fetch) e pontosService.ts
   hooks/        useDoacoes (carrega as doações sempre que a tela ganha foco)
   navigation/   rotas do app (stack)
   screens/      telas
@@ -40,7 +54,7 @@ Formato de cada doação salva:
 | #01 | Carta de abertura e setup do ambiente | `checklist-setup.md` |
 | #02 | Repositório pessoal e escopo único | `ficha-observacao.md` |
 | #03 | Lista de pontos de coleta | `src/screens/PontosScreen.js` |
-| #04 | Navegação lista → detalhe com FlatList e dados ampliados | `src/screens/DetalhePontoScreen.js`, `src/data/pontosColeta.js` |
+| #04 | Navegação lista → detalhe com FlatList e dados ampliados | `src/screens/DetalhePontoScreen.js` (a lista fixa saiu na N2-3) |
 | #05 | Formulário de cadastro com validação | `src/screens/CadastroDoacaoScreen.js`, `src/utils/validacaoDoacao.js` |
 | #06 | Layout responsivo | `src/theme/cores.js` (`larguraMaximaConteudo`), estilos das telas |
 | #07 | Persistência local da doação | `src/storage/doacoesStorage.js` |

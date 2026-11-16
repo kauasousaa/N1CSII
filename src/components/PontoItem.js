@@ -7,14 +7,14 @@ function PontoItem({ ponto, onPress }) {
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => onPress(ponto)}
+      onPress={() => onPress(ponto.id)}
       accessibilityRole="button"
       accessibilityHint="Abre os detalhes do ponto"
     >
       <EtiquetaTipo tipo={ponto.tipo} />
       <Text style={styles.nome}>{ponto.nome}</Text>
       <Text style={styles.info}>{ponto.endereco}</Text>
-      <Text style={styles.info}>{ponto.diasHorarios}</Text>
+      <Text style={styles.info}>{ponto.horario}</Text>
     </TouchableOpacity>
   );
 }
