@@ -1,11 +1,9 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import Tela from '../components/Tela';
-import { ErroApi } from '../services/api';
+import useItemDaApi from '../hooks/useItemDaApi';
+import { doacaoSalva } from '../navigation/itemSalvo';
 import { buscarPorId, excluir } from '../services/doacoesService';
-import { limparRetorno } from '../services/retornoDoacao';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 import { formatarData, pluralizar } from '../utils/formatacao';
 
@@ -20,42 +18,12 @@ function LinhaDetalhe({ rotulo, valor }) {
 
 export default function DetalheDoacaoScreen({ navigation, route }) {
   const { id } = route.params;
-  const [doacao, setDoacao] = useState(null);
-  const [carregando, setCarregando] = useState(true);
-  const [mensagem, setMensagem] = useState('');
-
-  useFocusEffect(
-    useCallback(() => {
-      let ativo = true;
-      setCarregando(true);
-      setMensagem('');
-
-      buscarPorId(id)
-        .then((encontrada) => {
-          if (ativo) {
-            setDoacao(encontrada);
-          }
-        })
-        .catch((erro) => {
-          if (!ativo) {
-            return;
-          }
-          setDoacao(null);
-          setMensagem(erro instanceof ErroApi && erro.status === 404
-            ? 'doação não encontrada'
-            : 'Não foi possível carregar a doação. Confira se a API está ligada.');
-        })
-        .finally(() => {
-          if (ativo) {
-            setCarregando(false);
-          }
-        });
-
-      return () => {
-        ativo = false;
-      };
-    }, [id])
-  );
+  const { item: doacao, carregando, mensagem } = useItemDaApi({
+    buscarPorId,
+    id,
+    mensagemNaoEncontrado: 'doação não encontrada',
+    mensagemErro: 'Não foi possível carregar a doação. Confira se a API está ligada.',
+  });
 
   function confirmarExclusao() {
     Alert.alert(
@@ -71,7 +39,7 @@ export default function DetalheDoacaoScreen({ navigation, route }) {
   async function apagarDoacao() {
     try {
       await excluir(id);
-      limparRetorno();
+      doacaoSalva.limpar();
       navigation.popTo('Historico');
     } catch {
       Alert.alert(

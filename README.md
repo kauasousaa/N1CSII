@@ -50,8 +50,9 @@ Favoritos ficam no aparelho porque são uma preferência de quem está usando o 
 ```
 src/
   components/   componentes reutilizáveis (Botao, CampoTexto, DoacaoItem, PontoItem, SeletorPonto...)
+  hooks/        useListaPaginada (rolagem infinita com filtro) e useItemDaApi (detalhe pelo id)
   services/     api.ts (único fetch), pontosService.ts e doacoesService.ts
-  navigation/   rotas do app (stack)
+  navigation/   rotas do app (stack) e itemSalvo.js, que leva o item salvo de volta para a lista
   screens/      telas
   storage/      favoritosStorage.js -> AsyncStorage só com os ids dos pontos favoritos
   theme/        cores e medidas
@@ -104,4 +105,5 @@ Formato de cada doação salva:
 - **Filtro e paginação no servidor**: com rolagem infinita o app só tem algumas páginas na memória, então filtrar no aparelho deixaria de fora o que ainda não foi carregado. Por isso o texto da busca vai para a API, e cada busca volta para a primeira página.
 - **Só `api.ts` chama `fetch`**: a URL do servidor fica num lugar só, e os services montam os caminhos. As telas não sabem nada de HTTP, só tratam o `ErroApi` com o status (404 vira "não encontrado", 400 vira "dados recusados").
 - **Um formulário para cadastro e edição**: as telas `CadastroPonto` e `CadastroDoacao` recebem (ou não) o item por `route.params`. Se recebem, entram no modo edição: trocam o título, preenchem os campos, mostram "Salvar alterações" e enviam `PUT` mantendo o mesmo `id`. A data de cadastro da doação é do servidor e não muda na edição.
+- **Paginação num hook só**: a lista de pontos e o histórico de doações usam o mesmo `useListaPaginada`. Ele cuida da busca com espera de digitação, de não pedir a mesma página duas vezes, de parar na última página e de ignorar respostas de buscas antigas. As telas só dizem qual função do service chamar.
 - **`DoacaoItem` com `React.memo`** e `renderItem`/`onPress` com `useCallback`, para a lista não re-renderizar todos os itens a cada letra digitada na busca.

@@ -1,36 +1,30 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { cores } from '../theme/cores';
 
-function OpcaoTipo({ valor, rotulo, escolhido, onPress }) {
-  return (
-    <TouchableOpacity
-      style={[styles.opcao, escolhido && styles.opcaoEscolhida]}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected: escolhido }}
-    >
-      <Text style={[styles.texto, escolhido && styles.textoEscolhido]}>{rotulo}</Text>
-    </TouchableOpacity>
-  );
-}
+const TIPOS = [
+  { valor: 'coleta', rotulo: 'Coleta' },
+  { valor: 'distribuição', rotulo: 'Distribuição' },
+];
 
 export default function SeletorTipoPonto({ tipoSelecionado, onSelecionar, erro }) {
   return (
     <View style={styles.container}>
       <Text style={styles.rotulo}>Tipo</Text>
       <View style={styles.opcoes}>
-        <OpcaoTipo
-          valor="coleta"
-          rotulo="Coleta"
-          escolhido={tipoSelecionado === 'coleta'}
-          onPress={() => onSelecionar('coleta')}
-        />
-        <OpcaoTipo
-          valor="distribuição"
-          rotulo="Distribuição"
-          escolhido={tipoSelecionado === 'distribuição'}
-          onPress={() => onSelecionar('distribuição')}
-        />
+        {TIPOS.map(({ valor, rotulo }) => {
+          const escolhido = tipoSelecionado === valor;
+          return (
+            <TouchableOpacity
+              key={valor}
+              style={[styles.opcao, escolhido && styles.opcaoEscolhida]}
+              onPress={() => onSelecionar(valor)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: escolhido }}
+            >
+              <Text style={[styles.texto, escolhido && styles.textoEscolhido]}>{rotulo}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
       {erro ? <Text style={styles.erro}>{erro}</Text> : null}
     </View>

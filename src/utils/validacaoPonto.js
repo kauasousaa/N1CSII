@@ -1,6 +1,4 @@
-function campoVazio(valor) {
-  return !String(valor ?? '').trim();
-}
+import { campoVazio } from './validacao';
 
 export function validarPonto({ nome, endereco, bairro, horario, tipo }) {
   const erros = {};
@@ -22,10 +20,6 @@ export function validarPonto({ nome, endereco, bairro, horario, tipo }) {
   }
 
   return erros;
-}
-
-export function temErros(erros) {
-  return Object.keys(erros).length > 0;
 }
 
 export function dadosDoPonto({ nome, endereco, bairro, horario, tipo }) {

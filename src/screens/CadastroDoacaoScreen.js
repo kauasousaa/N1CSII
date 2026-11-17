@@ -4,25 +4,18 @@ import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import SeletorPonto from '../components/SeletorPonto';
 import TelaComTeclado from '../components/TelaComTeclado';
-import { ErroApi } from '../services/api';
+import { doacaoSalva } from '../navigation/itemSalvo';
+import { temStatus } from '../services/api';
 import { cadastrar, editar } from '../services/doacoesService';
-import { guardarRetorno } from '../services/retornoDoacao';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
-import { temErros, validarDoacao } from '../utils/validacaoDoacao';
+import { temErros } from '../utils/validacao';
+import { dadosDaDoacao, validarDoacao } from '../utils/validacaoDoacao';
 
 function mensagemFalha(erro) {
-  if (erro instanceof ErroApi && erro.status === 400) {
+  if (temStatus(erro, 400)) {
     return 'A API recusou os dados. Confira os campos e tente de novo.';
   }
   return 'Não foi possível salvar a doação. Confira se a API está ligada.';
-}
-
-function montarDoacao({ tipoItem, quantidade, pontoDestino }) {
-  return {
-    tipoItem: tipoItem.trim(),
-    quantidade: Number(quantidade),
-    pontoDestino,
-  };
 }
 
 export default function CadastroDoacaoScreen({ navigation, route }) {
@@ -57,14 +50,14 @@ export default function CadastroDoacaoScreen({ navigation, route }) {
       return;
     }
 
-    const dados = montarDoacao({ tipoItem, quantidade, pontoDestino });
+    const dados = dadosDaDoacao({ tipoItem, quantidade, pontoDestino });
     setEnviando(true);
 
     try {
       const salva = modoEdicao
         ? await editar(doacaoEmEdicao.id, dados)
         : await cadastrar(dados);
-      guardarRetorno(salva);
+      doacaoSalva.guardar(salva);
       navigation.goBack();
     } catch (erro) {
       setFalha(mensagemFalha(erro));

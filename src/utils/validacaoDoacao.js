@@ -47,6 +47,10 @@ export function validarDoacao({ tipoItem, quantidade, pontoDestino }) {
   return Object.fromEntries(Object.entries(erros).filter(([, mensagem]) => mensagem));
 }
 
-export function temErros(erros) {
-  return Object.keys(erros).length > 0;
+export function dadosDaDoacao({ tipoItem, quantidade, pontoDestino }) {
+  return {
+    tipoItem: tipoItem.trim(),
+    quantidade: Number(quantidade),
+    pontoDestino,
+  };
 }

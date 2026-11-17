@@ -4,14 +4,15 @@ import Botao from '../components/Botao';
 import CampoTexto from '../components/CampoTexto';
 import SeletorTipoPonto from '../components/SeletorTipoPonto';
 import TelaComTeclado from '../components/TelaComTeclado';
-import { ErroApi } from '../services/api';
-import { guardarRetorno } from '../services/retornoPonto';
+import { pontoSalvo } from '../navigation/itemSalvo';
+import { temStatus } from '../services/api';
 import { cadastrar, editar } from '../services/pontosService';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
-import { dadosDoPonto, temErros, validarPonto } from '../utils/validacaoPonto';
+import { temErros } from '../utils/validacao';
+import { dadosDoPonto, validarPonto } from '../utils/validacaoPonto';
 
 function mensagemFalha(erro) {
-  if (erro instanceof ErroApi && erro.status === 400) {
+  if (temStatus(erro, 400)) {
     return 'A API recusou os dados. Confira os campos e tente de novo.';
   }
   return 'Não foi possível salvar o ponto. Confira se a API está ligada.';
@@ -55,7 +56,7 @@ export default function CadastroPontoScreen({ navigation, route }) {
       const salvo = modoEdicao
         ? await editar(pontoEmEdicao.id, dados)
         : await cadastrar(dados);
-      guardarRetorno(salvo);
+      pontoSalvo.guardar(salvo);
       navigation.goBack();
     } catch (erro) {
       setFalha(mensagemFalha(erro));

@@ -1,11 +1,9 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Botao from '../components/Botao';
 import EtiquetaTipo from '../components/EtiquetaTipo';
 import Tela from '../components/Tela';
-import { ErroApi } from '../services/api';
-import { limparRetorno } from '../services/retornoPonto';
+import useItemDaApi from '../hooks/useItemDaApi';
+import { pontoSalvo } from '../navigation/itemSalvo';
 import { buscarPorId, excluir } from '../services/pontosService';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
 
@@ -20,42 +18,12 @@ function Secao({ titulo, children }) {
 
 export default function DetalhePontoScreen({ navigation, route }) {
   const { id } = route.params;
-  const [ponto, setPonto] = useState(null);
-  const [carregando, setCarregando] = useState(true);
-  const [mensagem, setMensagem] = useState('');
-
-  useFocusEffect(
-    useCallback(() => {
-      let ativo = true;
-      setCarregando(true);
-      setMensagem('');
-
-      buscarPorId(id)
-        .then((encontrado) => {
-          if (ativo) {
-            setPonto(encontrado);
-          }
-        })
-        .catch((erro) => {
-          if (!ativo) {
-            return;
-          }
-          setPonto(null);
-          setMensagem(erro instanceof ErroApi && erro.status === 404
-            ? 'ponto não encontrado'
-            : 'Não foi possível carregar o ponto. Confira se a API está ligada.');
-        })
-        .finally(() => {
-          if (ativo) {
-            setCarregando(false);
-          }
-        });
-
-      return () => {
-        ativo = false;
-      };
-    }, [id])
-  );
+  const { item: ponto, carregando, mensagem } = useItemDaApi({
+    buscarPorId,
+    id,
+    mensagemNaoEncontrado: 'ponto não encontrado',
+    mensagemErro: 'Não foi possível carregar o ponto. Confira se a API está ligada.',
+  });
 
   function confirmarExclusao() {
     Alert.alert(
@@ -71,7 +39,7 @@ export default function DetalhePontoScreen({ navigation, route }) {
   async function apagarPonto() {
     try {
       await excluir(id);
-      limparRetorno();
+      pontoSalvo.limpar();
       navigation.popTo('Pontos');
     } catch {
       Alert.alert(

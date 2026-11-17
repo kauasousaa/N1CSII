@@ -10,6 +10,10 @@ export class ErroApi extends Error {
   }
 }
 
+export function temStatus(erro: unknown, status: number) {
+  return erro instanceof ErroApi && erro.status === status;
+}
+
 async function requisitar(caminho: string, opcoes: RequestInit = {}) {
   let resposta: Response;
   try {

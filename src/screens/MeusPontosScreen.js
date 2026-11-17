@@ -4,7 +4,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import Botao from '../components/Botao';
 import EstadoVazio from '../components/EstadoVazio';
 import Tela from '../components/Tela';
-import { ErroApi } from '../services/api';
+import { temStatus } from '../services/api';
 import { buscarPorId } from '../services/pontosService';
 import { desfavoritar, listarIdsFavoritos, salvarIdsFavoritos } from '../storage/favoritosStorage';
 import { cores, larguraMaximaConteudo } from '../theme/cores';
@@ -32,7 +32,7 @@ export default function MeusPontosScreen() {
             try {
               encontrados.push(await buscarPorId(id));
             } catch (falha) {
-              if (!(falha instanceof ErroApi) || falha.status !== 404) {
+              if (!temStatus(falha, 404)) {
                 throw falha;
               }
             }
